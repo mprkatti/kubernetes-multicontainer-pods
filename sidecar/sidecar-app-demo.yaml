@@ -9,17 +9,17 @@ spec:
   volumes:
     - name: data-volume
       emptyDir: {}
-
   containers:
     - image: ubuntu
       name: sidecar
       command: [
           'sh',
           '-c',
-          'echo start:$(date) > /var/ftp/start.txt;
+          'echo start:$(date) > /var/ftp/start.txt; mkdir /var/ftp/completed;
           apt update && apt upgrade -y && apt install lftp -y &&
           echo Finish:$(date) > /var/ftp/done.txt && sleep 100;
-          while true; do lftp ftp-svc.myns.svc.cluster.local -e " mput /var/ftp/data/data*.txt && exit";
+          while true; do lftp common-ftp-svc.myns.svc.cluster.local -e " mput /var/ftp/data/data*.txt && exit";
+          mv /var/ftp/data/data*.txt /var/ftp/completed;
           echo Processed file ...;
           sleep 5; done',
         ]
