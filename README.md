@@ -11,7 +11,7 @@ SideCar
 - under the 'sidecar' directoy execute
   kubectl create -f ft-svc.yaml
   kubectl create -f sidecar-app-demo.yaml
-- wait for the pods to come to 'Ready' state.
+- wait for the three pods to come to 'Ready' state.
 - exec into all three pods to see FTP transfers happening end-end
 
 Ambassador:
