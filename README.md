@@ -16,8 +16,11 @@ SideCar
 
 Ambassador:
 - under the 'ambassador' directory execute
+
   kubectl create configmap nginx-config -n myns --from-file nginx_default.conf
+  
   kubectl create -f ambassador.yaml
+  
 - exec into the main-app pod and execute the following curl commands:
 
   curl 127.0.0.1 
