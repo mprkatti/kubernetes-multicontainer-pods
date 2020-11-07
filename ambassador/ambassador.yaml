@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: main-app
+  name: main-app
+  namespace: myns
+spec:
+  volumes:
+    - name: config-vol
+      configMap:
+        name: nginx-config
+  containers:
+    - image: yauritux/busybox-curl
+      name: main-app
+      args: ['/bin/sh', '-c', 'echo hello; sleep 3600']
+
+    - image: nginx:alpine
+      name: ambassador
+      ports:
+        - containerPort: 80
+      volumeMounts:
+        - mountPath: /etc/nginx/conf.d
+          name: config-vol
+      resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}

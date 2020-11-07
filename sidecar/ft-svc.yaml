@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: common-ftp-svc
+  namespace: myns
+spec:
+  type: ClusterIP
+  ports:
+    - port: 21
+      protocol: TCP
+      targetPort: 21
+  selector:
+    run: common-ftp-server
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: common-ftp-server
+  name: common-ftp-server
+  namespace: myns
+spec:
+  containers:
+    - args:
+        - sh
+        - -c
+        - mkdir /var/ftp && chmod ugo+rw /var/ftp && tcpsvd -vE 0.0.0.0 21 ftpd -Aw /var/ftp
+      image: busybox
+      name: ftp-server
+      ports:
+        - containerPort: 21
+      resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
