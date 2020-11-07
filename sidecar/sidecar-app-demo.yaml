@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: sidecar-app
+  name: sidecar-app
+  namespace: myns
+spec:
+  volumes:
+    - name: data-volume
+      emptyDir: {}
+
+  containers:
+    - image: ubuntu
+      name: sidecar
+      command: [
+          'sh',
+          '-c',
+          'echo start:$(date) > /var/ftp/start.txt;
+          apt update && apt upgrade -y && apt install lftp -y &&
+          echo Finish:$(date) > /var/ftp/done.txt && sleep 100;
+          while true; do lftp ftp-svc.myns.svc.cluster.local -e " mput /var/ftp/data/data*.txt && exit";
+          echo Processed file ...;
+          sleep 5; done',
+        ]
+      volumeMounts:
+        - mountPath: /var/ftp
+          name: data-volume
+      startupProbe:
+        exec:
+          command:
+            - cat
+            - /var/ftp/done.txt
+        periodSeconds: 12
+        failureThreshold: 7
+      resources: {}
+    - image: busybox
+      name: main-app
+      command: ['/bin/sh']
+      args: [
+          '-c',
+          'mkdir /ftp/data;while true; do  dt=$(shuf -i 0-100000 -n 1);
+          echo $(date):= Hello > /ftp/data/data-${dt}.txt ;
+          sleep 5;done',
+        ]
+      readinessProbe:
+        exec:
+          command:
+            - cat
+            - /ftp/done.txt
+        periodSeconds: 12
+        failureThreshold: 10
+      volumeMounts:
+        - mountPath: /ftp
+          name: data-volume
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
